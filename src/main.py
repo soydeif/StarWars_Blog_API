@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Favorites, Planets, Characters
 #from models import Person
 
 app = Flask(__name__)
@@ -32,12 +32,171 @@ def sitemap():
 
 @app.route('/user', methods=['GET'])
 def handle_hello():
+    req = User.query.all()
+    response = []
+    
+    return jsonify({"response" : list(map(lambda x:x.serialize(), req))}), 200
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+@app.route('/user', methods=['POST'])
+def handle_hello1():
+    body_request = request.get_json()
 
-    return jsonify(response_body), 200
+    name = body_request.get("name", None)
+    last_name = body_request.get("last_name", None)
+    username = body_request.get("username", None)
+    email= body_request.get("email", None)
+    password= body_request.get("password", None)
+    user1 = User(name=name, last_name=last_name, username=username, email = email, password=password)
+    db.session.add(user1)
+    db.session.commit()
+
+
+    return jsonify({"msg":  "Usuario creado exitosamente"}), 200
+
+
+@app.route('/people', methods=['POST'])
+def people():
+    body_request = request.get_json()
+
+    name = body_request.get("name", None)
+    height = body_request.get("height", None)
+    mass = body_request.get("mass", None)
+    hair_color= body_request.get("hair_color", None)
+    skin_color= body_request.get("skin_color", None)
+    birth_year= body_request.get("birth_year", None)
+
+
+    Newcha = Characters(name=name, height=height, mass=mass, hair_color = hair_color, skin_color=skin_color, birth_year=birth_year)
+    db.session.add(Newcha)
+    db.session.commit()
+
+
+    return jsonify({"msg":  "Character creado exitosamente"}), 200
+
+@app.route('/people', methods=['GET'])
+def peolpeget():
+    req = Characters.query.all()
+    response = []
+    return jsonify({"response" : list(map(lambda x:x.serialize(), req))}), 200
+
+@app.route('/people/<int:people_id>', methods=['GET'])
+def peopleid(people_id):
+    body = request.get_json()
+    cha = Characters.query.get(people_id)
+    return jsonify(cha.serialize()), 200
+
+@app.route('/planets', methods=['POST'])
+def planets():
+    body_request = request.get_json()
+
+    name = body_request.get("name", None)
+    rotation_period = body_request.get("rotation_period", None)
+    orbital_period = body_request.get("orbital_period", None)
+    diameter= body_request.get("diameter", None)
+    gravity= body_request.get("gravity", None)
+    population= body_request.get("population", None)
+
+
+    Newpla = Planets(name=name, rotation_period=rotation_period, orbital_period=orbital_period, diameter = diameter, gravity=gravity, population=population)
+    db.session.add(Newpla)
+    db.session.commit()
+
+
+    return jsonify({"msg":  "Character creado exitosamente"}), 200
+
+@app.route('/planets', methods=['GET'])
+def plaget():
+    req = Planets.query.all()
+    response = []
+    return jsonify({"response" : list(map(lambda x:x.serialize(), req))}), 200
+
+@app.route('/planets/<int:planets_id>', methods=['GET'])
+def planetsid(planets_id):
+    body = request.get_json()
+    cha = Planets.query.get(planets_id)
+    return jsonify(cha.serialize()), 200
+
+@app.route('/user/favorites', methods=['POST'])
+def favuser():
+    body_request = request.get_json()
+
+    user_id = body_request.get("user_id", None)
+    planet_id = body_request.get("planet_id", None)
+    character_id = body_request.get("character_id", None)
+    Newfav = Favorites(user_id=user_id, planet_id=planet_id, character_id=character_id)
+    db.session.add(Newfav)
+    db.session.commit()
+
+
+    return jsonify({"msg":  "Character creado exitosamente"}), 200
+
+@app.route('/user/favorites', methods=['GET'])
+def favgetuser():
+    req = Favorites.query.all()
+    response = []
+    return jsonify({"response" : list(map(lambda x:x.serialize(), req))}), 200
+
+
+@app.route('/favorite/planet/<int:planet_id>', methods=['POST'])
+def favplaid(planet_id):
+    body_request = request.get_json()
+    planet_id = body_request.get("planet_id", None)
+    name = body_request.get("name", None)
+    rotation_period = body_request.get("rotation_period", None)
+    orbital_period = body_request.get("orbital_period", None)
+    diameter= body_request.get("diameter", None)
+    gravity= body_request.get("gravity", None)
+    population= body_request.get("population", None)
+
+
+    Newpla = Planets(name=name, rotation_period=rotation_period, orbital_period=orbital_period, diameter = diameter, gravity=gravity, population=population)
+    db.session.add(Newpla)
+    db.session.commit()
+
+
+    return jsonify({"msg":  "Planet creado exitosamente"}), 200
+
+@app.route('/favorite/people/<int:people_id>', methods=['POST'])
+def favpeople(people_id):
+    body_request = request.get_json()
+    people_id = body_request.get("people_id", None)
+    name = body_request.get("name", None)
+    height = body_request.get("height", None)
+    mass = body_request.get("mass", None)
+    hair_color= body_request.get("hair_color", None)
+    skin_color= body_request.get("skin_color", None)
+    birth_year= body_request.get("birth_year", None)
+    Newcha = Characters(name=name, height=height, mass=mass, hair_color = hair_color, skin_color=skin_color, birth_year=birth_year)
+    db.session.add(Newcha)
+    db.session.commit()
+
+    return jsonify({"msg":  "Character creado exitosamente"}), 200
+
+@app.route('/favorite/planet/<int:planet_id>', methods=['GET'])
+def planetsidfav(planet_id):
+    body = request.get_json()
+    cha = Planets.query.get(planet_id)
+    return jsonify(cha.serialize()), 200
+
+@app.route('/favorite/people/<int:people_id>', methods=['GET'])
+def peoplesidfav(people_id):
+    cha = Favorites.query.filter_by(id=people_id).first()
+    return jsonify(cha.serialize()), 200
+
+@app.route('/favorite/people/<int:people_id>', methods=['DELETE'])
+def peoplesidfavdelete(people_id):
+    people = Favorites.query.filter_by(character_id=people_id).delete()
+    db.session.commit()
+    return jsonify({"Borrado": people}), 200
+
+@app.route('/favorite/planet/<int:planet_id>', methods=['DELETE'])
+def peoplesidfavdeletee(planet_id):
+    people = Favorites.query.filter_by(planet_id=planet_id).delete()
+    db.session.commit()
+    return jsonify({"Borrado": people}), 200
+
+
+
 
 # this only runs if `$ python src/main.py` is executed
 if __name__ == '__main__':
